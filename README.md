@@ -1,8 +1,9 @@
-Kdenlive-Tools
-==============
+Video Tools
+===========
 
-Contains scripts for the Kdenlive video editor:
-* gopro-proxy.py - can create proxies for kdenlive from gopro lrv files (tested on GoPro Hero 3+ Black)
+Contains linux video editors tools:
+* kdenlive-proxy-gopro.py - link gopro lrv files as proxies for kdenlive
+* flowblade-proxy-gopro.py - link gopro lrv files as proxies for flowblade
 
 Requirements:
 -------------

@@ -9,7 +9,7 @@ Required:    python2.7
 
 Usage:
   1. Execute script in your project folder:
-    $ ./gopro-proxy.py <LRV_DIR> [ORIG_EXT=.MP4] [PROXY_EXT=.LRV] [PROXY_DIR=LRV_DIR/proxy]
+    $ ./kdenlive-proxy-gopro.py <LRV_DIR> [ORIG_EXT=.MP4] [PROXY_EXT=.LRV] [PROXY_DIR=LRV_DIR/proxy]
   2. Create new or use existing kdenlive project
   3. Disable autocreation of proxies and change proxy ext to 'mp4' in your project settings
   4. Select all gopro files and run proxy recreation
@@ -33,7 +33,7 @@ if not os.path.isdir(LRV_DIR):
 files = os.listdir(LRV_DIR)
 
 for f in files:
-    if f.lower().endswith(PROXY_EXT):
+    if f.lower().endswith(PROXY_EXT.lower()):
         print 'Processing %s' % f
         forig = f[:-len(PROXY_EXT)] + ORIG_EXT
         if not forig in files:
