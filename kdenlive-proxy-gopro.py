@@ -37,7 +37,7 @@ for f in files:
         print 'Processing %s' % f
         forig = f[:-len(PROXY_EXT)] + ORIG_EXT
         if not forig in files:
-            print '  unable to find original file %s' % os.path.join(LRV_DIR, fname + ORIG_EXT)
+            print '  unable to find original file %s' % os.path.join(LRV_DIR, forig)
             exit(1)
         m = hashlib.md5()
         forig = os.path.join(LRV_DIR, forig)
