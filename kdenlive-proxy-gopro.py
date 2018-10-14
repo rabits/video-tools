@@ -24,38 +24,42 @@ parser.add_argument("proj_dir", help="Path to project dir, where oriinal files l
 parser.add_argument("orig_ext", nargs='?', help="File extension of original gopro files, case sensitive (default: %(default)s)", metavar='ORIG_EXT', default='.MP4')
 parser.add_argument("lrv_ext", nargs='?', help="File extension of lrv gopro files, case insensitive (default: %(default)s)", metavar='PROXY_EXT', default='.LRV')
 parser.add_argument("proxy_dir", nargs='?', help="File extension of original gopro files (default: <PROJ_DIR>/proxy)", metavar='PROXY_DIR', default=None)
+parser.add_argument("-l", "--lrv-dir", help="Path to separate dir with LRV files if they are not placed with original files (default: <PROJ_DIR>)", metavar='LRV_DIR', default=None)
 
 args = parser.parse_args()
 args.proxy_dir = args.proxy_dir or os.path.join(args.proj_dir, 'proxy')
+args.lrv_dir = args.lrv_dir or args.proj_dir
 
-if not os.path.isdir(args.proj_dir):
-    print('Dir "%s" does not exist' % args.proj_dir)
-    exit(1)
+for dir_path in (args.proj_dir, args.lrv_dir):
+    if not os.path.isdir(dir_path):
+        print('Dir "%s" does not exist' % dir_path)
+        exit(1)
 
 if not os.path.isdir(args.proxy_dir):
     print('Proxy dir "%s" created' % args.proxy_dir)
     os.makedirs(args.proxy_dir)
 
-files = os.listdir(args.proj_dir)
+proj_files = [f for f in os.listdir(args.proj_dir) if f.lower().endswith(args.orig_ext.lower())]
+lrv_files = (lrv for lrv in os.listdir(args.lrv_dir) if lrv.lower().endswith(args.lrv_ext.lower()))
 
-for f in files:
-    if f.lower().endswith(args.lrv_ext.lower()):
-        print('Processing %s' % f)
-        forig = f[:-len(args.lrv_ext)] + args.orig_ext
-        if not forig in files:
-            print('  unable to find original file %s' % os.path.join(args.proj_dir, forig))
-            exit(1)
-        m = hashlib.md5()
-        forig = os.path.join(args.proj_dir, forig)
-        fsize = os.path.getsize(forig)
-        with open(forig, "rb") as fd:
-            if fsize > 1000000*2:
-                m.update(fd.read(1000000))
-                fd.seek(fsize - 1000000)
-            m.update(fd.read())
-        link = os.path.join(args.proxy_dir, m.hexdigest()) + args.orig_ext.lower()
-        target = os.path.relpath(os.path.join(args.proj_dir, f), args.proxy_dir)
-        print('  create link %s target: %s' % (link, target))
-        if os.path.lexists(link):
-            os.remove(link)
-        os.symlink(target, link)
+for lrv in lrv_files:
+    print('Processing %s/%s' % (args.lrv_dir, lrv))
+    f_orig = lrv[:-len(args.lrv_ext)] + args.orig_ext
+    if not f_orig in proj_files:
+        print('  unable to find original file %s' % os.path.join(args.proj_dir, f_orig))
+        exit(1)
+    m = hashlib.md5()
+    f_orig = os.path.join(args.proj_dir, f_orig)
+    fsize = os.path.getsize(f_orig)
+    with open(f_orig, "rb") as fd:
+        if fsize > 1000000*2:
+            m.update(fd.read(1000000))
+            fd.seek(fsize - 1000000)
+        m.update(fd.read())
+    link = os.path.join(args.proxy_dir, m.hexdigest()) + args.orig_ext.lower()
+    target = os.path.relpath(os.path.join(args.proj_dir, lrv), args.proxy_dir)
+    if os.path.lexists(link):
+        print('  remove old link %s' % link)
+        os.remove(link)
+    print('  create link %s target: %s' % (link, target))
+    os.symlink(target, link)
